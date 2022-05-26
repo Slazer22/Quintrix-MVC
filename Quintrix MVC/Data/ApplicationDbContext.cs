@@ -4,13 +4,13 @@ using Quintrix_MVC.Models;
 
 namespace Quintrix_MVC.Data
 {
-    public class ApplicationDbContext : IdentityDbContext
+    public class ApplicationDbContext : IdentityDbContext <PushinP>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
 
-        DbSet<PlayerModel> Player { get; set; }
+        public DbSet<PlayerModel> Player { get; set; }
     }
 }
