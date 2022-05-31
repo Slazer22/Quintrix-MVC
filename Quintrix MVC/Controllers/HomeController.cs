@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Quintrix_MVC.Models;
 using System.Diagnostics;
 
@@ -17,7 +18,7 @@ namespace Quintrix_MVC.Controllers
         {
             return View();
         }
-
+        [Authorize(Roles="Big Chungus")]
         public IActionResult Privacy()
         {
             return View();

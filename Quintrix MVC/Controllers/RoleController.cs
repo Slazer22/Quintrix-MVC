@@ -5,15 +5,76 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Quintrix_MVC.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Quintrix_MVC.Controllers
 {
     public class RoleController : Controller
     {
         private RoleManager<IdentityRole> roleManager;
-        public RoleController(RoleManager<IdentityRole> roleMgr)
+        private UserManager<PushinP> userManager;
+        public RoleController(RoleManager<IdentityRole> roleMgr, UserManager<PushinP> User)
         {
             roleManager = roleMgr;
+            userManager = User;
+        }
+        public async Task<IActionResult> Update(string id)
+        {
+            IdentityRole role = await roleManager.FindByIdAsync(id);
+            List<PushinP> members = new List<PushinP>();
+            List<PushinP> nonMembers = new List<PushinP>();
+
+            var userList = await userManager.Users.ToListAsync(); // this fixes the datareader issue
+            // this was causing a datareader error
+            //foreach (AppUser user in userManager.Users)
+            foreach (PushinP user in userList)
+            {
+                var list = await userManager.IsInRoleAsync(user, role.Name) ? members : nonMembers;
+                list.Add(user);
+            }
+            return View(new RoleEdit
+            {
+                Role = role,
+                Members = members,
+                NonMembers = nonMembers
+            });
+        }
+
+        [HttpPost]
+
+
+        public async Task<IActionResult> Update(RoleModification model)
+        {
+            IdentityResult result;
+            if (ModelState.IsValid)
+            {
+                foreach (string userId in model.AddIds ?? new string[] { })
+                {
+                    PushinP user = await userManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        result = await userManager.AddToRoleAsync(user, model.RoleName);
+                        if (!result.Succeeded)
+                            Errors(result);
+                    }
+                }
+                foreach (string userId in model.DeleteIds ?? new string[] { })
+                {
+                    PushinP user = await userManager.FindByIdAsync(userId);
+                    if (user != null)
+                    {
+                        result = await userManager.RemoveFromRoleAsync(user, model.RoleName);
+                        if (!result.Succeeded)
+                            Errors(result);
+                    }
+                }
+            }
+
+            if (ModelState.IsValid)
+                return RedirectToAction(nameof(Index));
+            else
+                return await Update(model.RoleId);
         }
 
         public ViewResult Index() => View(roleManager.Roles);

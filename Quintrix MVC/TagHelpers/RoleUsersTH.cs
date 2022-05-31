@@ -4,16 +4,18 @@ using Microsoft.PowerBI.Api.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using Quintrix_MVC.Models;
 
 namespace Identity.TagHelpers
 {
     [HtmlTargetElement("td", Attributes = "i-role")]
     public class RoleUsersTH : TagHelper
     {
-        private UserManager<AppUser> userManager;
+
+        private UserManager<PushinP> userManager;
         private RoleManager<IdentityRole> roleManager;
 
-        public RoleUsersTH(UserManager<AppUser> usermgr, RoleManager<IdentityRole> rolemgr)
+        public RoleUsersTH(UserManager<PushinP> usermgr, RoleManager<IdentityRole> rolemgr)
         {
             userManager = usermgr;
             roleManager = rolemgr;
@@ -31,7 +33,7 @@ namespace Identity.TagHelpers
                 foreach (var user in userManager.Users)
                 {
                     if (user != null && await userManager.IsInRoleAsync(user, role.Name))
-                        names.Add(user.DisplayName);
+                        names.Add(user.UserName);
                 }
             }
             output.Content.SetContent(names.Count == 0 ? "No Users" : string.Join(", ", names));
